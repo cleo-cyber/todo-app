@@ -1,7 +1,5 @@
-# from crypt import methods
-# from sre_parse import FLAGS
-from crypt import methods
-from flask import Flask, render_template, request
+
+from flask import Flask, render_template, request,redirect,url_for,jsonify
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -21,12 +19,17 @@ class Todo(db.Model):
     
 db.create_all()
 
-@app.route('/create',methods=['POST'])
+@app.route('/todos/create',methods=['POST'])
 def create_todo():
-    decription=request.form.get('decription','')
+    # decription=request.form.get('decription','')
+    decription=request.get_json()['description']
     todo=Todo(decription=decription)
     db.session.add(todo)
     db.session.commit()
+    # return redirect(url_for('index'))
+    return jsonify({
+        'description':todo.decription
+    })
     
 
 @app.route('/')
