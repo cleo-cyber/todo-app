@@ -9,6 +9,20 @@
             list-style: none;
             padding: 0;
             margin: 0;
+            width: 200px;
+           }
+           li{
+            clear: both;
+           }
+           li button{
+            -webkit-appearance: none;
+            border: none;
+            outline: none;
+            color: red;
+            float: right;
+            cursor: pointer;
+            font-size: 20px;
+            background-color: inherit;
            }
        </style>
     </head>
@@ -22,18 +36,38 @@
         <ul id="todos">
             {% for d in data %}
 
-            <li><input class="check-completed" type="checkbox" {% if d.completed %} checked {% endif %} >{{ d.decription }}</li>
+            <li><input class="check-completed" data-id="{{d.id}}" type="checkbox" {% if d.completed %} checked {% endif %} >{{ d.decription }}
+
+                <button name='deleted' class="delete" data-id="{{d.id}}">&cross;</button>
+            </li>
           
           {% endfor %}
         </ul>
         <script type="text/javascript">
+
+            const crosdelete=document.querySelectorAll('.delete');
+            for(let i=0;i< crosdelete.length;i++){
+                const deleteitem=crosdelete[i];
+                deleteitem.onclick=function(e){
+                    //console.log('events',e);
+                    const delete_id=e.target.dataset['id'];
+                    fetch('/todos/' + delete_id,{
+                        method:'DELETE'
+                    });
+
+                }
+            }
+
+
+
             const checkboxes=document.querySelectorAll('.check-completed')
             for(let i=0;i < checkboxes.length;i++){
                const checkbox=checkboxes[i];
                checkbox.onchange=function(e){
                 console.log('event',e);
                 const newCompleted=e.target.checked;
-                fetch('/todos/set-completed',{
+                const todoid=e.target.dataset['id'];
+                fetch('/todos/' + todoid +'set-completed',{
                     method:'POST',
                     body:JSON.stringify({
                         'completed':newCompleted
@@ -41,11 +75,17 @@
                     headers:{
                         'Content-Type':'application/json'
                     }
-
+                })
+                .then(function(){
+                    document.getElementById('error').className='hidden'
+                })
+                .catch(function(){
+                    document.getElementById('error').className='';
 
                 })
-
+                
                } 
+               
             }
 
             document.getElementById('form').onsubmit=function(e)/* e is the event object */ {
