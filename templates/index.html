@@ -38,7 +38,7 @@
 
             <li><input class="check-completed" data-id="{{d.id}}" type="checkbox" {% if d.completed %} checked {% endif %} >{{ d.decription }}
 
-                <button name='deleted' class="delete" data-id="{{d.id}}">&cross;</button>
+                <button name='deleted'class="delete" data-id="{{d.id}}">&cross;</button>
             </li>
           
           {% endfor %}
@@ -49,7 +49,7 @@
             for(let i=0;i< crosdelete.length;i++){
                 const deleteitem=crosdelete[i];
                 deleteitem.onclick=function(e){
-                    //console.log('events',e);
+                    console.log('events',e);
                     const delete_id=e.target.dataset['id'];
                     fetch('/todos/' + delete_id,{
                         method:'DELETE'
@@ -64,7 +64,7 @@
             for(let i=0;i < checkboxes.length;i++){
                const checkbox=checkboxes[i];
                checkbox.onchange=function(e){
-                console.log('event',e);
+                //console.log('event',e);
                 const newCompleted=e.target.checked;
                 const todoid=e.target.dataset['id'];
                 fetch('/todos/' + todoid +'set-completed',{
