@@ -10,6 +10,7 @@
             padding: 0;
             margin: 0;
             width: 200px;
+            vertical-align: top;
            }
            li{
             clear: both;
@@ -24,26 +25,60 @@
             font-size: 20px;
             background-color: inherit;
            }
+           .list-wrapper,.todos-wrapper{
+            display: inline-block;
+            vertical-align: top;
+           }
        </style>
     </head>
     <body>
-
+        <div class="list-wrapper">
+            <form id="formlist">
+                <input type="text" name="createtask">
+                <input  type="Submit" value="Create task" name="">
+            </form>
+        <ul id="lists">
+            {% for list in lists %}
+            <li id="listid"><a href="/lists/{{list.id}}"> {{list.name}}</a></li> 
+            
+            {% endfor %}
+        </ul>
+        </div>
+        <div class="todos-wrapper">
+            <h4>{{ active_list.name }}</h4>
         <form id="form">
             <input type="text" id="decription" name="decription">
             <input type="Submit" value="Create">
         </form>
         <div id="error" class="hidden">Something went wrong</div>
         <ul id="todos">
-            {% for d in data %}
+            {% for todo in todos %}
 
-            <li><input class="check-completed" data-id="{{d.id}}" type="checkbox" {% if d.completed %} checked {% endif %} >{{ d.decription }}
+            <li><input class="check-completed" data-id="{{todo.id}}" type="checkbox" {% if todo.completed %} checked {% endif %} >{{ todo.decription }}
 
-                <button name='deleted'class="delete" data-id="{{d.id}}">&cross;</button>
+                <button name='deleted'class="delete" data-id="{{todo.id}}">&cross;</button>
             </li>
           
           {% endfor %}
         </ul>
+        </div>
+
         <script type="text/javascript">
+            document.getElementById('formlist').onsubmit=function(e){
+                e.preventDefault();
+
+                fetch('/todolists/create',{
+                    method:'POST',
+                    body:JSON.stringify({
+                        'create':document.getElementById('listid').value
+                    }),
+                    headers:{
+                        'Content-Type':'application/json'
+                    }
+                })
+            }
+
+
 
             const crosdelete=document.querySelectorAll('.delete');
             for(let i=0;i< crosdelete.length;i++){

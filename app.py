@@ -1,8 +1,7 @@
 
-# from os import abort
-
 # from crypt import methods
 import sys
+# from unicodedata import name
 from flask import Flask, render_template, request,redirect,url_for,jsonify,abort
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -35,6 +34,30 @@ class TodoList(db.Model):
 
         def __repr__(self):
             return f'<TodoList {self.id} {self.name}>'
+
+order_items = db.Table('order_items',
+    db.Column('order_id', db.Integer, db.ForeignKey('order.id'), primary_key=True),
+    db.Column('product_id', db.Integer, db.ForeignKey('product.id'), primary_key=True)
+)
+
+class Order(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  status = db.Column(db.String(), nullable=False)
+  products = db.relationship('Product', secondary=order_items,
+      backref=db.backref('orders', lazy=True))
+
+class Product(db.Model):
+  id = db.Column(db.Integer, primary_key=True)
+  name = db.Column(db.String(), nullable=False)
+  
+  
+@app.route('/todolists/create',methods=['POST'])
+def create_todo_lists():
+    name=request.get_json()['create']
+    newlist=TodoList(name=name)
+    db.session.add(newlist)
+    db.session.commit()
+    redirect(url_for('get_list_todos'))
 
 @app.route('/todos/create',methods=['POST'])
 def create_todo():
@@ -96,7 +119,14 @@ def delete_todo(delete_id):
         return jsonify({'success':True})
 
 
+@app.route('/lists/<list_id>')
+def get_list_todos(list_id):
+    return render_template('index.html',
+            lists=TodoList.query.all(), 
+            active_list=TodoList.query.get(list_id),      
+            todos=Todo.query.filter_by(list_id=list_id).order_by('id').all())
+
+
 @app.route('/')
 def index():
-    return render_template('index.html',data=Todo.query.order_by('id').all())
-
+    return redirect(url_for('get_list_todos',list_id=1))
